@@ -11,6 +11,10 @@ clean:
 lint:
 	@golint ./...
 
+.PHONY: report
+report:
+	@curl -XPOST 'https://goreportcard.com/checks' --data 'repo=github.com/blackhorseya/gocommon'
+
 .PHONY: test-unit # execute unit test
 test-unit:
 	@sh $(shell pwd)/scripts/go.test.sh
