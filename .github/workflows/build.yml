@@ -1,0 +1,44 @@
+name: Build
+on:
+  push:
+    branches-ignore:
+      - 'release-**'
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.yaml'
+      - '**/*.yml'
+      - 'deployments/**'
+      - 'api/**'
+      - 'configs/**'
+      - 'scripts/**'
+      - 'Makefile'
+      - 'Dockerfile'
+      - '.cz.yaml'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+      - name: Setup go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '^1.17'
+      - name: Setup cache
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Lint
+        run: |
+          go get -u golang.org/x/lint/golint
+          make lint
+      - name: Test
+        run: |
+          make test-unit
+      - name: Send code coverage report
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
